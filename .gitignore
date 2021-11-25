@@ -1,0 +1,6 @@
+vendor
+.idea
+.data
+.env
+.example
+!.env.sample
