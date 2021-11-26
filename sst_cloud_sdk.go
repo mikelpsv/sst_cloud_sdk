@@ -17,11 +17,9 @@ const (
 	DEVICE_TYPE_MC350  = 1
 	DEVICE_TYPE_NEPTUN = 2
 
-	DEVICE_STATUS_ON = "on"
+	DEVICE_STATUS_ON  = "on"
 	DEVICE_STATUS_OFF = "off"
 )
-
-
 
 type LoginRequest struct {
 	Username string `json:"username"`
@@ -95,35 +93,7 @@ type TimeSetting struct {
 	DeviceId          int64 `json:"device"`
 }
 
-type Device struct {
-	Id                         int64       `json:"id"`
-	Configuration              string      `json:"configuration"` // base64
-	ParsedConfiguration        string      `json:"parsed_configuration"`
-	Timeout                    int         `json:"timeout"`
-	TimeSetting                TimeSetting `json:"time_setting"`
-	Group                      string      `json:"group"` // undefined type null
-	ActiveNetworkId            int64       `json:"active_network"`
-	SpecificSettings           interface{} `json:"specific_settings"`
-	CreatedAt                  time.Time   `json:"created_at"`
-	UpdatedAt                  time.Time   `json:"updated_at"`
-	Name                       string      `json:"name"`
-	Type                       int         `json:"type"`
-	PreviousMode               string      `json:"previous_mode"`
-	IsActive                   bool        `json:"is_active"`
-	IsConnected                bool        `json:"is_connected"`
-	MacAddress                 string      `json:"mac_address"`
-	Power                      int         `json:"power"`            // Мощность модуля
-	PowerRelayTime             string      `json:"power_relay_time"` // Время рабоы устройства (readonly)
-	ChartTemperatureComfort    int         `json:"chart_temperature_comfort"`
-	ChartTemperatureEconomical int         `json:"chart_temperature_economical"`
-	WirelessSensorsNames       []string    `json:"wireless_sensors_names"` // undefined type - пустой массив имен?
-	LineNames                  []string    `json:"line_names"`
-	LinesEnable                []string    `json:"lines_enable"`
-	HouseId                    int64       `json:"house_id"`
-}
-
 const API_ENDPOINT = "https://api.sst-cloud.com"
-
 
 /*
 	Авторизация в системе
@@ -279,13 +249,20 @@ func (s *Session) GetDevice(houseId int64, deviceId int64) (*Device, error) {
 	return respDev, nil
 }
 
-func (s *Session) SetDeviceStatus(d *Device, devStatus string)  {
-	status := fmt.Sprintf("{\"status\":%s}", devStatus)
-	bodyReq := bytes.NewReader([]byte(status))
+func (s *Session) SetDeviceStatus(d *Device, devStatus string) {
+	st := struct {
+		Status string `json:"status"`
+	}{Status: devStatus}
+
+	status, err := json.Marshal(st)
+	if err != nil {
+		return
+	}
+	bodyReq := bytes.NewReader(status)
 
 	respDev := new(Device)
 	endpoint := fmt.Sprintf("%s/houses/%d/devices/%d/status/", API_ENDPOINT, d.HouseId, d.Id)
-	body, err := s.DoRequest("GET", endpoint, bodyReq)
+	body, err := s.DoRequest("POST", endpoint, bodyReq)
 	if err != nil {
 		return
 	}
@@ -328,9 +305,6 @@ func (s *Session) SetThemperature(houseId int64, deviceId int64) (*Device, error
 	return respDev, nil
 }
 
-
-
-
 func (s *Session) DoRequest(method string, endpoint string, body io.Reader) ([]byte, error) {
 	req, err := http.NewRequest(method, endpoint, body)
 	if err != nil {
@@ -338,7 +312,10 @@ func (s *Session) DoRequest(method string, endpoint string, body io.Reader) ([]b
 	}
 	req.Header["Accept"] = []string{"*/*"}
 	req.Header["Content-Type"] = []string{"application/json"}
+
 	s.SetCookies(req)
+	s.SetCSRFToken(req)
+
 	resp, err := s.HttpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -357,5 +334,13 @@ func (s *Session) SetCookies(r *http.Request) {
 func (s *Session) GetCookies(r *http.Response) {
 	if len(r.Cookies()) > 0 {
 		s.Cookies = r.Cookies()
+	}
+}
+
+func (s *Session) SetCSRFToken(r *http.Request) {
+	for _, c := range s.Cookies {
+		if c.Name == "csrftoken" {
+			r.Header["X-CSRFToken"] = []string{c.Value}
+		}
 	}
 }
