@@ -16,7 +16,12 @@ const (
 	DEVICE_TYPE_MC300  = 0
 	DEVICE_TYPE_MC350  = 1
 	DEVICE_TYPE_NEPTUN = 2
+
+	DEVICE_STATUS_ON = "on"
+	DEVICE_STATUS_OFF = "off"
 )
+
+
 
 type LoginRequest struct {
 	Username string `json:"username"`
@@ -274,6 +279,23 @@ func (s *Session) GetDevice(houseId int64, deviceId int64) (*Device, error) {
 	return respDev, nil
 }
 
+func (s *Session) SetDeviceStatus(d *Device, devStatus string)  {
+	status := fmt.Sprintf("{\"status\":%s}", devStatus)
+	bodyReq := bytes.NewReader([]byte(status))
+
+	respDev := new(Device)
+	endpoint := fmt.Sprintf("%s/houses/%d/devices/%d/status/", API_ENDPOINT, d.HouseId, d.Id)
+	body, err := s.DoRequest("GET", endpoint, bodyReq)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(body, &respDev)
+	if err != nil {
+		return
+	}
+	return
+}
+
 /*
 	Список беспроводных датчиков, зарегистрированных в устройстве
 	GET /houses/{houseId}/wireless_sensors/
@@ -285,6 +307,29 @@ func (s *Session) GetDevice(houseId int64, deviceId int64) (*Device, error) {
 	GET /houses/{houseId}/devices/{deviceId}/counters/
 	@link https://api.sst-cloud.com/docs/#/devices/devices_counters_read
 */
+
+/*
+	Информация об устройстве по его идентификатору
+	GET /houses/{houseId}/devices/{id}/
+	@link https://api.sst-cloud.com/docs/#/devices/devices_read
+*/
+
+func (s *Session) SetThemperature(houseId int64, deviceId int64) (*Device, error) {
+	respDev := new(Device)
+	endpoint := fmt.Sprintf("%s/houses/%d/devices/%d", API_ENDPOINT, houseId, deviceId)
+	body, err := s.DoRequest("GET", endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(body, &respDev)
+	if err != nil {
+		return nil, err
+	}
+	return respDev, nil
+}
+
+
+
 
 func (s *Session) DoRequest(method string, endpoint string, body io.Reader) ([]byte, error) {
 	req, err := http.NewRequest(method, endpoint, body)
