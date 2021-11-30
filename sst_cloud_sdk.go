@@ -96,8 +96,8 @@ const API_ENDPOINT = "https://api.sst-cloud.com"
 
 /*
 	Авторизация в системе
- 	POST /auth/user/
-    @link https://api.sst-cloud.com/docs/#/auth/login_create
+	POST /auth/user/
+	@link https://api.sst-cloud.com/docs/#/auth/login_create
 */
 func (s *Session) Login(authUser LoginRequest) (*LoginResponse, error) {
 	if authUser.Language == "" {
@@ -124,8 +124,8 @@ func (s *Session) Login(authUser LoginRequest) (*LoginResponse, error) {
 
 /*
 	Информация о текущем пользователе
- 	GET /auth/user/
-    @link https://api.sst-cloud.com/docs/#/auth/user_list
+	GET /auth/user/
+	@link https://api.sst-cloud.com/docs/#/auth/user_list
 */
 func (s *Session) UserInfo() (*User, error) {
 	respUser := new(User)
@@ -143,8 +143,8 @@ func (s *Session) UserInfo() (*User, error) {
 
 /*
 	Выход из системы
- 	POST /auth/logout/
-    @link https://api.sst-cloud.com/docs/#/auth/logout_create
+	POST /auth/logout/
+	@link https://api.sst-cloud.com/docs/#/auth/logout_create
 */
 func (s *Session) Logout() (string, error) {
 	emptyBody := bytes.NewReader([]byte(``))
@@ -158,8 +158,8 @@ func (s *Session) Logout() (string, error) {
 
 /*
 	Список домов пользователя
- 	POST /houses/
-    @link https://api.sst-cloud.com/docs/#/houses/list
+	POST /houses/
+	@link https://api.sst-cloud.com/docs/#/houses/list
 */
 func (s *Session) GetHouses() ([]House, error) {
 	respHouses := make([]House, 0)
@@ -178,7 +178,7 @@ func (s *Session) GetHouses() ([]House, error) {
 
 /*
 	Информация о доме по его идентификатору
- 	GET /houses/{houseId}/
+	GET /houses/{houseId}/
 	@link https://api.sst-cloud.com/docs/#/houses/read
 */
 func (s *Session) GetHouse(houseId int64) (*House, error) {
@@ -205,7 +205,7 @@ func (s *Session) GetHouse(houseId int64) (*House, error) {
 /*
 	Информация о сети по ее идентификатору
 	GET /houses/{houseId}/networks/{networkId}/
- 	@link https://api.sst-cloud.com/docs/#/networks/networks_read
+	@link https://api.sst-cloud.com/docs/#/networks/networks_read
 */
 // TODO: func (s *Session) GetNetwork(houseId int64, networkId int64) error
 
