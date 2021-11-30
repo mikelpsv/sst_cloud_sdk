@@ -63,6 +63,7 @@ type DevConfThermostat struct {
 	OpenWindowMinutes int `json:"open_window_minutes"`
 }
 
+
 /*
 	Читет в структуру строку настроек
 */
@@ -71,3 +72,5 @@ func (d *Device) ReadConfigThermostat() (*DevConfThermostat, error) {
 	err := json.Unmarshal([]byte(d.ParsedConfiguration), &res)
 	return res, err
 }
+
+
