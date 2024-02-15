@@ -6,10 +6,9 @@ import (
 )
 
 const (
-	USERNAME = ""
-	PASSWORD = ""
+	USERNAME  = ""
+	PASSWORD  = ""
 	YOUR_MAIL = ""
-
 )
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
 	}
 	fmt.Println(ui)
 
-	// Чтение домовладений текущего аккаунтв
+	// Чтение домовладений текущего аккаунта
 	houses, err := s.GetHouses()
 	if err != nil {
 		fmt.Println(err)

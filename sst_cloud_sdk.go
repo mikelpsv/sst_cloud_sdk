@@ -33,9 +33,9 @@ type LoginResponse struct {
 }
 
 type Session struct {
-	Id         string
-	Key        string
-	Cookies    []*http.Cookie
+	Id      string
+	Key     string
+	Cookies []*http.Cookie
 }
 
 type UserProfile struct {
@@ -95,9 +95,9 @@ type TimeSetting struct {
 const API_ENDPOINT = "https://api.sst-cloud.com"
 
 /*
-	Авторизация в системе
-	POST /auth/user/
-	@link https://api.sst-cloud.com/docs/#/auth/login_create
+Авторизация в системе
+POST /auth/user/
+@link https://api.sst-cloud.com/docs/#/auth/login_create
 */
 func (s *Session) Login(authUser LoginRequest) (*LoginResponse, error) {
 	if authUser.Language == "" {
@@ -123,9 +123,9 @@ func (s *Session) Login(authUser LoginRequest) (*LoginResponse, error) {
 }
 
 /*
-	Информация о текущем пользователе
-	GET /auth/user/
-	@link https://api.sst-cloud.com/docs/#/auth/user_list
+Информация о текущем пользователе
+GET /auth/user/
+@link https://api.sst-cloud.com/docs/#/auth/user_list
 */
 func (s *Session) UserInfo() (*User, error) {
 	respUser := new(User)
@@ -142,9 +142,9 @@ func (s *Session) UserInfo() (*User, error) {
 }
 
 /*
-	Выход из системы
-	POST /auth/logout/
-	@link https://api.sst-cloud.com/docs/#/auth/logout_create
+Выход из системы
+POST /auth/logout/
+@link https://api.sst-cloud.com/docs/#/auth/logout_create
 */
 func (s *Session) Logout() (string, error) {
 	emptyBody := bytes.NewReader([]byte(``))
@@ -157,9 +157,9 @@ func (s *Session) Logout() (string, error) {
 }
 
 /*
-	Список домов пользователя
-	POST /houses/
-	@link https://api.sst-cloud.com/docs/#/houses/list
+Список домов пользователя
+POST /houses/
+@link https://api.sst-cloud.com/docs/#/houses/list
 */
 func (s *Session) GetHouses() ([]House, error) {
 	respHouses := make([]House, 0)
@@ -177,9 +177,9 @@ func (s *Session) GetHouses() ([]House, error) {
 }
 
 /*
-	Информация о доме по его идентификатору
-	GET /houses/{houseId}/
-	@link https://api.sst-cloud.com/docs/#/houses/read
+Информация о доме по его идентификатору
+GET /houses/{houseId}/
+@link https://api.sst-cloud.com/docs/#/houses/read
 */
 func (s *Session) GetHouse(houseId int64) (*House, error) {
 	respHouse := House{}
@@ -210,9 +210,9 @@ func (s *Session) GetHouse(houseId int64) (*House, error) {
 // TODO: func (s *Session) GetNetwork(houseId int64, networkId int64) error
 
 /*
-	Список устройств в доме
-	GET /houses/{houseId}/devices/
-	@link https://api.sst-cloud.com/docs/#/devices/devices_list
+Список устройств в доме
+GET /houses/{houseId}/devices/
+@link https://api.sst-cloud.com/docs/#/devices/devices_list
 */
 func (s *Session) GetDevices(houseId int64) ([]Device, error) {
 	respDevs := make([]Device, 0)
@@ -290,18 +290,19 @@ func (s *Session) SetDeviceStatus(d *Device, devStatus string) {
 	@link https://api.sst-cloud.com/docs/#/devices/devices_read
 */
 
-func (s *Session) SetThemperature(houseId int64, deviceId int64) (*Device, error) {
-	respDev := new(Device)
-	endpoint := fmt.Sprintf("%s/houses/%d/devices/%d", API_ENDPOINT, houseId, deviceId)
-	body, err := s.DoRequest("GET", endpoint, nil)
+func (s *Session) SetTemperature(houseId int, deviceId int, tempSet *TemperatureSet) error {
+	jsonData, err := json.Marshal(tempSet)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	err = json.Unmarshal(body, &respDev)
+	bodyReq := bytes.NewReader(jsonData)
+
+	endpoint := fmt.Sprintf("%s/houses/%d/devices/%d/temperature/", API_ENDPOINT, houseId, deviceId)
+	_, err = s.DoRequest("POST", endpoint, bodyReq)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return respDev, nil
+	return nil
 }
 
 func (s *Session) DoRequest(method string, endpoint string, body io.Reader) ([]byte, error) {

@@ -63,14 +63,20 @@ type DevConfThermostat struct {
 	OpenWindowMinutes int `json:"open_window_minutes"`
 }
 
+type TemperatureSet struct {
+	TemperatureManual        int `json:"temperature_manual"`
+	TemperatureVacation      int `json:"temperature_vacation"`
+	TemperatureAir           int `json:"temperature_air"`
+	TemperatureLove          int `json:"temperature_love"`
+	TemperatureCorrectionAir int `json:"temperature_correction_air"`
+	CurrTemperature          int `json:"curr_temperature"`
+}
 
 /*
-	Читет в структуру строку настроек
+Читает в структуру строку настроек
 */
 func (d *Device) ReadConfigThermostat() (*DevConfThermostat, error) {
 	res := new(DevConfThermostat)
 	err := json.Unmarshal([]byte(d.ParsedConfiguration), &res)
 	return res, err
 }
-
-
